@@ -1,13 +1,56 @@
-# You can override the included template(s) by including variable overrides
-# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
-# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
-# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
-# Note that environment variables can be set in several places
-# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
+variables:
+  DOCKER_DRIVER: overlay2
+  APP_NAME: vaultwarden-backup
+
 stages:
-- test
-sast:
-  stage: test
+  - build
+  - test
+
 include:
-- template: Security/SAST.gitlab-ci.yml
+  - template: Container-Scanning.gitlab-ci.yml
+
+.build:
+  image: docker:24.0.6
+  stage: build
+  services:
+    - name: docker:24.0.6-dind
+      alias: docker
+  script:
+    - docker info
+    - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD $DOCKER_REGISTRY
+    - docker buildx create --use
+    - docker buildx build --platform linux/amd64,linux/arm64 --push -t $IMAGE .
+    - docker logout $DOCKER_REGISTRY
+  tags: ["gitlab-org-docker"]
+
+build:
+  extends: .build
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA
+    DOCKER_USER: $CI_REGISTRY_USER
+    DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
+    DOCKER_REGISTRY: $CI_REGISTRY
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+
+build-dockerhub:
+  extends: .build
+  variables:
+    IMAGE: raackley/$APP_NAME:latest
+    DOCKER_USER: "raackley"
+    DOCKER_PASSWORD: "$DOCKERHUB_TOKEN"
+    DOCKER_REGISTRY: ""
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "master"'
+
+container_scanning:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "master"'
