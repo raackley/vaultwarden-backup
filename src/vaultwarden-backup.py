@@ -44,12 +44,12 @@ with open(backup_file_path, "rb") as file:
 # Specify the object name (file name in the bucket)
 object_name = os.path.basename(backup_file_path)
 
-# Get the namesapce
-object_storage_namesapce = object_storage.get_namespace().data
+# Get the namespace
+object_storage_namespace = object_storage.get_namespace().data
 
 # Upload the file to the bucket
 object_storage.put_object(
-    namespace_name=object_storage_namesapce,
+    namespace_name=object_storage_namespace,
     bucket_name=oci_bucket_name,
     object_name=object_name,
     put_object_body=object_data
