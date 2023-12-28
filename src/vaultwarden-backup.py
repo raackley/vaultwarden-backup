@@ -1,5 +1,6 @@
 import oci
 import os
+from datetime import datetime
 
 # Get environment variables
 oci_user_id = os.environ.get("OCI_USER_ID")
@@ -9,6 +10,19 @@ oci_tenancy = os.environ.get("OCI_TENANCY")
 oci_region = os.environ.get("OCI_REGION")
 oci_compartment_id = os.environ.get("OCI_COMPARTMENT_ID")
 oci_bucket_name = os.environ.get("OCI_BUCKET_NAME")
+
+# Get the current date and time
+current_datetime = datetime.now()
+
+# Format the date and time as per your requirement
+formatted_date_time = current_datetime.strftime("%Y%m%d-%H%M")
+
+# Backup file path
+backup_file_path = f"/backups/db-{formatted_date_time}.sqlite3"
+
+# Backup running db to /backups
+os.system("mkdir -p /backups") 
+os.system(f"sqlite3 /data/db.sqlite3 \".backup '{backup_file_path}'\"")
 
 # Set your Oracle Cloud credentials and configuration
 config = {
@@ -23,15 +37,12 @@ config = {
 # Create a client
 object_storage = oci.object_storage.ObjectStorageClient(config)
 
-# Specify the file to be uploaded
-file_to_upload = "/path/to/test.txt"
-
 # Create a stream for the file
-with open(file_to_upload, "rb") as file:
+with open(backup_file_path, "rb") as file:
     object_data = file.read()
 
 # Specify the object name (file name in the bucket)
-object_name = os.path.basename(file_to_upload)
+object_name = os.path.basename(backup_file_path)
 
 # Get the namesapce
 object_storage_namesapce = object_storage.get_namespace().data
