@@ -1,0 +1,5 @@
+---
+apiVersion: v2
+description: "Vaultwarden Backup"
+name: vaultwarden-backup
+version: 0.1.1

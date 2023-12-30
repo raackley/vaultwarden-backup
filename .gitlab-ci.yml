@@ -34,7 +34,7 @@ build:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH'
 
 build-dockerhub:
   extends: .build
@@ -46,11 +46,39 @@ build-dockerhub:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH'
 
 container_scanning:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: never
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH'
+
+.upload:
+  stage: build
+  image: alpine:latest
+  script:
+    - apk add curl
+    - apk add helm
+    - ./build_and_upload.sh
+
+upload-test:
+  extends:
+    - .upload
+  variables:
+    USER: $TEST_USER
+    PASS: $TEST_PASS
+    REPO_URL: $TEST_REPO_URL
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+upload-stable:
+  extends:
+    - .upload
+  variables:
+    USER: $STABLE_USER
+    PASS: $STABLE_PASS
+    REPO_URL: $STABLE_REPO_URL
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH'
