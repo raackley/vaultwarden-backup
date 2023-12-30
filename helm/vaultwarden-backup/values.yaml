@@ -1,0 +1,10 @@
+cron_schedule: "0 5 * * 5" # At 05:00 on Fridays
+oci_user_id: ""
+oci_key_fingerprint: ""
+oci_tenancy: ""
+oci_region: ""
+oci_compartment_id: ""
+oci_bucket_name: ""
+data_mountpath: /data
+secret_key_mountpath: /oci
+data_pvc_name: vaultwarden-data

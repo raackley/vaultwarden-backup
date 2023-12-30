@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: vaultwarden-backup
+spec:
+  schedule: {{ .Values.cron_schedule }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: {{ .Values.data_pvc_name }}
+            - name: oci-key
+              secret:
+                secretName: oci-key
+          containers:
+          - name: vaultwarden-backup
+            image: raackley/vaultwarden-backup:latest
+            imagePullPolicy: Always
+            env:
+              - name: OCI_USER_ID
+                value: {{ .Values.oci_user_id }}
+              - name: OCI_KEY_FILE_PATH
+                value: "{{ .Values.secret_key_mountpath }}/key.pem"
+              - name: OCI_KEY_FILE_FINGERPRINT
+                value: {{ .Values.oci_key_fingerprint }}
+              - name: OCI_TENANCY
+                value: {{ .Values.oci_tenancy }}
+              - name: OCI_REGION
+                value: {{ .Values.oci_region }}
+              - name: OCI_COMPARTMENT_ID
+                value: {{ .Values.oci_compartment_id }}
+              - name: OCI_BUCKET_NAME
+                value: {{ .Values.oci_bucket_name }}
+            volumeMounts:
+              - name: data
+                mountPath: {{ .Values.data_mountpath }}
+              - name: oci-key
+                readOnly: true
+                mountPath: {{ .Values.secret_key_mountpath }}
+          restartPolicy: Never
+      backoffLimit: 4
