@@ -36,7 +36,7 @@ shutil.copyfile(f"{source_dir}/config.json", f"{backup_dir}/config.json")
 
 # Compress directory into archive
 tar = tarfile.open(backup_archive_file, "w:gz")
-tar.add("backup_dir")
+tar.add(backup_dir)
 tar.close()
 
 # Set your Oracle Cloud credentials and configuration
