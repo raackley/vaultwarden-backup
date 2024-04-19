@@ -59,9 +59,10 @@ container_scanning:
   stage: build
   image: alpine:latest
   script:
-    - apk add curl
+    - apk add python3
+    - apk add py3-requests
     - apk add helm
-    - ./build_and_upload.sh
+    - python3 build_and_upload.py
 
 upload-test:
   extends:
