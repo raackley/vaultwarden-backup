@@ -20,6 +20,10 @@ spec:
             image: raackley/vaultwarden-backup:latest
             imagePullPolicy: Always
             env:
+              - name: OCI_ENABLED
+                value: {{ .Values.oci_enabled }}
+              - name: S3_ENABLED
+                value: {{ .Values.s3_enabled }}
               - name: OCI_USER_ID
                 value: {{ .Values.oci_user_id }}
               - name: OCI_KEY_FILE_PATH
@@ -34,6 +38,22 @@ spec:
                 value: {{ .Values.oci_compartment_id }}
               - name: OCI_BUCKET_NAME
                 value: {{ .Values.oci_bucket_name }}
+              - name: S3_BUCKET_NAME
+                value: {{ .Values.s3_bucket_name }}
+              - name: S3_ENDPOINT_URL
+                value: {{ .Values.s3_endpoint_url }}
+              - name: S3_AWS_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-key
+                    key: AWS_ACCESS_KEY_ID
+              - name: S3_AWS_SECRET_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: s3-key
+                    key: AWS_SECRET_ACCESS_KEY
+              - name: S3_REGION_NAME
+                value: {{ .Values.s3_region_name }}
             volumeMounts:
               - name: data
                 mountPath: {{ .Values.data_mountpath }}

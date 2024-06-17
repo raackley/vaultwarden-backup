@@ -1,7 +1,7 @@
 # vaultwarden-backup
 
 ## Description
-This project allows for easy backup from Vaultwarden, deployed to a kubernetes cluster, to Oracle Cloud Object Storage.  Oracle Cloud Object Storage was chosen over Amazon AWS S3 simply becasue Oracle gives you a good amount of Object Storage for free, so why not.  Support for the more popular Amazon AWS S3 might be considered in the future.
+This project allows for easy backup from Vaultwarden, deployed to a kubernetes cluster, to AWS S3 (or compatible) buckets, and/or to Oracle Cloud Object Storage.  Oracle Cloud Object Storage provides a generous amount of Object Storage for free, so it can be a good option for these backups.
 
 This backup application is designed to run on a Kubernetes cluster, and it is designed to backup Vaultwarden running on that same Kubernetes cluster, in the same namespace.  Therefore, as a prereq, you must already be running Vaultwarden on Kubernetes.  This is tested against this [Vaultwarden helm chart](https://charts.gabe565.com/charts/vaultwarden/).
 
@@ -13,13 +13,21 @@ This application is packaged into a Helm chart for ease of use.  It is a Kuberne
 * An Oracle Cloud (OCI) account with an Object Storage buck and an API key that can access it
 
 ## Installation
+### When using OCI Object Storage
 Create secret `oci-key` in the namespace where vaultwarden is already installed, using the OCI key for your user with Object Storage permissions.
 
 ```
 kubectl create secret generic oci-key --from-file=key.pem=/path/to/key.pem -n <your vaultwarden namespace>
 ```
 
+### When using AWS S3 Object Storage
+Create secret `s3-key` in the namespace where vaultwarden is already installed.
 
+```
+kubectl create secret generic s3-key --from-literal=AWS_ACCESS_KEY_ID=<your key id> --from-literal=AWS_SECRET_ACCESS_KEY=<your secret key> -n <your vaultwarden namespace>
+```
+
+### Install with Helm
 Add and update the Helm repo.
 
 ```
@@ -40,12 +48,17 @@ helm install <release name> -n <your vaultwarden namespace> raackley-stable/vaul
 | Parameter | Description | Default Value | Required? |
 | --- | --- | --- | --- |
 | cron_schedule | Schedule in Cron syntax | "0 5 * * 5" | N |
-| oci_user_id | OCI User ID | <none> | Y |
-| oci_key_fingerprint | OCI API Key Fingerprint | <none> | Y |
-| oci_tenancy | OCI Tenancy ID | <none> | Y |
-| oci_region | OCI region | <none> | Y |
-| oci_compartment_id | OCI Compartment ID | <none> | Y |
-| oci_bucket_name | OCI Bucket Name | <none> | Y |
+| oci_enabled | Upload to OCI storage or not | "not_enabled" | N |
+| s3_enabled | Upload to S3 storage or not | "not_enabled" | N |
+| oci_user_id | OCI User ID | <none> | N |
+| oci_key_fingerprint | OCI API Key Fingerprint | <none> | N |
+| oci_tenancy | OCI Tenancy ID | <none> | N |
+| oci_region | OCI region | <none> | N |
+| oci_compartment_id | OCI Compartment ID | <none> | N |
+| oci_bucket_name | OCI Bucket Name | <none> | N |
+| s3_bucket_name | S3 Bucket Name | <none> | N |
+| s3_endpoint_url | S3 Endpoint URL | "s3.amazonaws.com" | N |
+| s3_region_name | S3 Region | "us-east-1" | N |
 | data_mountpath | Where Vaultwarden's data is | "/data" | N |
 | secret_key_mountpath | Where your Secret key file gets mounted | "/oci" | N |
 | data_pvc_name | The name of your Vaultwarden PVC | "vaultwarden-data" | N |
