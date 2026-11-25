@@ -2,4 +2,4 @@
 apiVersion: v2
 description: "Vaultwarden Backup"
 name: vaultwarden-backup
-version: 1.0.0
+version: 1.0.1

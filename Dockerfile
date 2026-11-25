@@ -1,11 +1,20 @@
-FROM python:3-slim
+FROM python:3.13-slim-trixie
 
-LABEL maintainer="ryan@ryanackley.com"
+LABEL org.opencontainers.image.source=https://github.com/raackley/vaultwarden-backup
+LABEL org.opencontainers.image.description="Backup Vaultwarden to AWS S3 and/or Oracle Cloud Object Storage"
 
-ADD src/ .
+WORKDIR /app
 
-RUN python -m pip install -r requirements.txt
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends sqlite3 \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt update && apt install sqlite3 -y
+COPY src/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-CMD python vaultwarden-backup.py
+COPY src/ .
+
+RUN useradd --create-home appuser
+USER appuser
+
+CMD ["python", "vaultwarden-backup.py"]

@@ -17,7 +17,7 @@ spec:
                 secretName: oci-key
           containers:
           - name: vaultwarden-backup
-            image: raackley/vaultwarden-backup:latest
+            image: ghcr.io/raackley/vaultwarden-backup:latest
             imagePullPolicy: Always
             env:
               - name: OCI_ENABLED
