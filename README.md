@@ -28,21 +28,26 @@ kubectl create secret generic s3-key --from-literal=AWS_ACCESS_KEY_ID=<your key 
 ```
 
 ### Install with Helm
-Add and update the Helm repo.
 
-```
-helm repo add raackley-charts https://charts.ryanackley.com
-```
+Charts are published as OCI artifacts to the GitHub Container Registry (no login or
+repository setup required).
 
-```
-helm repo update
-```
+Install the latest published version (check
+https://github.com/raackley?tab=packages for available versions):
 
-Install (Helm v3).
+​```
+helm install vaultwarden-backup \
+  oci://ghcr.io/raackley/charts/vaultwarden-backup \
+  --version 1.0.0
+​```
 
-```
-helm install <release name> -n <your vaultwarden namespace> raackley-stable/vaultwarden-backup
-```
+To upgrade later:
+
+​```
+helm upgrade vaultwarden-backup \
+  oci://ghcr.io/raackley/charts/vaultwarden-backup \
+  --version 1.0.1
+​```
 
 ## Helm Values
 | Parameter | Description | Default Value | Required? |
