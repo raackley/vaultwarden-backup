@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ .
 
 RUN useradd --create-home appuser
+RUN mkdir /backups && chown appuser:appuser /backups
 USER appuser
 
 CMD ["python", "vaultwarden-backup.py"]
