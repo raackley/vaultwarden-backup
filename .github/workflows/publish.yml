@@ -23,11 +23,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: raackley
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Compute short SHA
+        id: sha
+        run: echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push image
         uses: docker/build-push-action@v6
@@ -37,9 +35,7 @@ jobs:
           push: true
           tags: |
             ghcr.io/raackley/vaultwarden-backup:latest
-            ghcr.io/raackley/vaultwarden-backup:${{ github.sha }}
-            raackley/vaultwarden-backup:latest
-            raackley/vaultwarden-backup:${{ github.sha }}
+            ghcr.io/raackley/vaultwarden-backup:${{ steps.sha.outputs.short }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -64,6 +60,13 @@ jobs:
             chart=$(basename "$dir")
             version=$(awk '$1 == "version:" {print $2; exit}' "$dir/Chart.yaml")
             echo "Chart: ${chart} ${version}"
+
+            # Skip if this exact chart version is already published
+            if helm pull "oci://ghcr.io/raackley/charts/${chart}" --version "${version}" >/dev/null 2>&1; then
+              echo "Version ${version} already published, skipping."
+              continue
+            fi
+
             helm dependency update "$dir"
             helm package "$dir" --destination .
             helm push "${chart}-${version}.tgz" oci://ghcr.io/raackley/charts

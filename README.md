@@ -38,7 +38,7 @@ https://github.com/raackley?tab=packages for available versions):
 ​```
 helm install vaultwarden-backup \
   oci://ghcr.io/raackley/charts/vaultwarden-backup \
-  --version 1.0.0
+  --version 1.0.1
 ​```
 
 To upgrade later:
@@ -46,7 +46,7 @@ To upgrade later:
 ​```
 helm upgrade vaultwarden-backup \
   oci://ghcr.io/raackley/charts/vaultwarden-backup \
-  --version 1.0.1
+  --version 1.0.2
 ​```
 
 ## Helm Values

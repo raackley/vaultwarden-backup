@@ -51,8 +51,7 @@ pipeline after merge.
 
 Merging to `master` automatically publishes:
 
-- the image to `ghcr.io/raackley/vaultwarden-backup:latest` and Docker Hub
-  (`raackley/vaultwarden-backup:latest`), tagged with the commit SHA, and
+- the image to `ghcr.io/raackley/vaultwarden-backup:latest`, tagged with the commit SHA, and
 - the Helm chart to `ghcr.io/raackley/charts/vaultwarden-backup:<chart version>`.
 
 Both are publicly pullable without authentication.

@@ -1,0 +1,31 @@
+name: cleanup-pr-image
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  delete-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Delete image version tagged pr-N
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: pr-${{ github.event.number }}
+        run: |
+          if ! versions=$(gh api --paginate "/user/packages/container/vaultwarden-backup/versions" 2>/dev/null); then
+            echo "Package not accessible or not created yet — nothing to delete."
+            exit 0
+          fi
+          ids=$(echo "$versions" | jq -r --arg tag "$TAG" \
+            '.[] | select((.metadata.container.tags // []) | index($tag)) | .id')
+          if [ -z "$ids" ]; then
+            echo "No image version tagged ${TAG} — nothing to delete."
+            exit 0
+          fi
+          for id in $ids; do
+            echo "Deleting package version $id (tag ${TAG})"
+            gh api -X DELETE "/user/packages/container/vaultwarden-backup/versions/$id"
+          done
