@@ -58,6 +58,7 @@ jobs:
           platforms: linux/amd64
           push: false
           load: true
+          provenance: false
           tags: vaultwarden-backup:scan
           cache-from: type=gha
           cache-to: type=gha,mode=max
